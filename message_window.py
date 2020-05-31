@@ -40,16 +40,16 @@ class MessageWindow(tk.Canvas):
 
     def update_message_widgets(self, messages, message_labels):
         existing_labels = [
-            (message["text"], time["text"]) for message, time in message_labels
+            (message, time) for message, time in message_labels
         ]
 
         for message in messages:
-            message_time = datetime.datetime.fromtimestamp(message["date"]).strftime(
-                "%d-%m-%Y %H:%M:%S"
-            )
+            # message_time = datetime.datetime.fromtimestamp(message["date"]).strftime(
+            #     "%d-%m-%Y %H:%M:%S"
+            # )
 
-            if (message["message"], message_time) not in existing_labels:
-                self._create_message_container(message["message"], message_time, message_labels)
+            if (message[0], message[1]) not in existing_labels:
+                self._create_message_container(message[1],message[0], message_labels)
     
     def _create_message_container(self, message_content, message_time, message_labels):
         container = ttk.Frame(self.messages_frame, style="Messages.TFrame")

@@ -1,6 +1,5 @@
 import tkinter as tk
 from tkinter import ttk
-import requests
 from message_window import MessageWindow
 
 messages = [{"message": "Hello, world", "date": 15498487}]
@@ -8,11 +7,13 @@ message_labels = []
 
 
 class Chat(ttk.Frame):
-    def __init__(self, container, background, *args, **kwargs):
+    def __init__(self, container, background, client, *args, **kwargs):
         super().__init__(container, *args, **kwargs)
 
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
+
+        self.client = client
 
         self.message_window = MessageWindow(self, background=background)
         self.message_window.grid(row=0, column=0, sticky="NSEW", pady=5)
@@ -38,16 +39,20 @@ class Chat(ttk.Frame):
             command=self.get_messages
         )
         message_fetch.pack()
-        self.message_window.update_message_widgets(messages, message_labels)
+        
+        
+        #self.message_window.update_message_widgets(messages, message_labels)
     
     def post_message(self):
         body = self.message_input.get("1.0", "end").strip()
-        requests.post("http://167.99.63.70/message", json={"message": body})
+        self.client.message = body
+        self.client.is_message_sent = True
+        self.client.available_messages.append((self.client.my_username, body))
         self.message_input.delete('1.0', "end")
         self.get_messages()
 
     def get_messages(self):
         global messages
-        messages = requests.get("http://167.99.63.70/messages").json()
+        messages = self.client.available_messages
         self.message_window.update_message_widgets(messages, message_labels)
         self.after(150, lambda: self.message_window.yview_moveto(1.0))
