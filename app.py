@@ -23,6 +23,7 @@ class Messenger(tk.Tk):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+
         #####################################  WINDOW #########################################
         self.geometry("1200x500")
         self.minsize(800, 500)
@@ -61,7 +62,6 @@ class Messenger(tk.Tk):
         style.configure("Message.TLabel", background=COLOUR_LIGHT_BACKGROUND_2)
         #############################################################################################
 
-
         self.chat_frame = Chat(
             self,
             background=COLOUR_LIGHT_BACKGROUND_3,
@@ -70,14 +70,16 @@ class Messenger(tk.Tk):
 
         self.chat_frame.grid(row=0, column=0, sticky="NSEW")
 
+        self.chat_frame.client.send_public_key()
 
         username = input("Enter your username: ")
+
+
         self.chat_frame.client.send(username)
 
+        self.protocol("WM_DELETE_WINDOW", self.chat_frame.client.on_closing)
 
-    # def listen(self):
-    #     self.chat_frame.get_messages()
-    #     sleep(0.001)
+        
 
       
 if __name__ == '__main__':
@@ -86,5 +88,5 @@ if __name__ == '__main__':
 
     receive_thread = Thread(target=root.chat_frame.client.receive)
     receive_thread.start()
-    root.mainloop()  # Starts GUI execution.
+    root.mainloop()  
 

@@ -56,7 +56,7 @@ class MessageWindow(tk.Canvas):
 
         def reconfigure_message_labels(event):
             closest_break_point = min(SCREEN_SIZE_TO_MESSAGE_WIDTH.keys(), key=lambda b: abs(b - container.winfo_width()))
-            for label, _ in message_labels:
+            for label, _, _ in message_labels:
                 if label.winfo_width() < closest_break_point:
                     label.configure(wraplength=SCREEN_SIZE_TO_MESSAGE_WIDTH[closest_break_point])
             self.messages_frame.update()

@@ -4,6 +4,7 @@ from socket import AF_INET, socket, SOCK_STREAM
 from threading import Thread
 import tkinter
 import datetime
+import rsa
 
 class Client():
     def __init__(self):
@@ -18,17 +19,31 @@ class Client():
 
         self.available_messages = []
 
+        self.PUBLIC_KEY, self.PRIVATE_KEY = rsa.generate_keys()
+
     def receive(self):
         while True:
             try:
-                msg=self.client_socket.recv(self.BUFSIZ).decode("utf8")
-                print("mensaje enviado:", msg)
-                user, message = msg.split("<!||||!>")
-                print(f"user: {user}, message: {message}")
-                self.available_messages.append((user, datetime.datetime.now().strftime("%d-%m-%Y %H:%M:%S"), message))
+                msg_received = self.client_socket.recv(self.BUFSIZ).decode("utf8").split("<!||||!>")
+
+
+                if len(msg_received) > 1:
+                    user, encrypted_message = msg_received
+                    print("receoved message:", encrypted_message)
+                    message = rsa.decrypt(encrypted_message, self.PUBLIC_KEY[0], self.PRIVATE_KEY)
+                    print(f"user: {user}, message: {message}")
+                    self.available_messages.append((user, datetime.datetime.now().strftime("%d-%m-%Y %H:%M:%S"), message))
             except OSError:  # Possibly client has left the chat.
                 break
 
 
     def send(self, message, event=None):  
+
         self.client_socket.send(bytes(message, "utf8"))
+
+    def send_public_key(self):
+        self.send(str(self.PUBLIC_KEY[0]) + "," + str(self.PUBLIC_KEY[1]))
+
+    def on_closing(self, event=None):
+        """This function is to be called when the window is closed."""
+        self.send("{quit}")

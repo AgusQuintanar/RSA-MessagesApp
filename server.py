@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+
+import rsa
+
 """Server for multithreaded (asynchronous) chat application."""
 from socket import AF_INET, socket, SOCK_STREAM
 from threading import Thread
@@ -15,9 +18,10 @@ def accept_incoming_connections():
 
 def handle_client(client):  # Takes client socket as argument.
     """Handles a single client connection."""
-
+    CLIENT_PUBLIC_KEY = client.recv(BUFSIZ).decode("utf8").split(",")
     name = client.recv(BUFSIZ).decode("utf8")
-    clients[client] = name
+    print("incoming PK:", CLIENT_PUBLIC_KEY, "type", type(CLIENT_PUBLIC_KEY), "name", name)
+    clients[client] = (name, CLIENT_PUBLIC_KEY)
 
     while True:
         msg = client.recv(BUFSIZ)
@@ -27,15 +31,21 @@ def handle_client(client):  # Takes client socket as argument.
             client.send(bytes("{quit}", "utf8"))
             client.close()
             del clients[client]
-            broadcast(bytes("%s has left the chat." % name, "utf8"))
             break
 
 
 def broadcast(msg, prefix=""):  # prefix is for name identification.
     """Broadcasts a message to all the clients."""
 
+    print("debug 1:", msg)
+
     for sock in clients:
-        sock.send(bytes(prefix, "utf8")+msg)
+        user, PUBLIC_KEY = clients[sock]
+        print("PUBLIC KEY:", PUBLIC_KEY)
+        print("message to encrypt:", msg.decode("utf8"))
+        encrypted_msg = rsa.encrypt(msg.decode("utf8"), PUBLIC_KEY)
+        print("message to decrypt:", encrypted_msg)
+        sock.send(bytes(prefix, "utf8")+bytes(encrypted_msg, "utf8"))
 
         
 clients = {}
