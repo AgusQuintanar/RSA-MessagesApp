@@ -4,6 +4,9 @@ import tkinter.font as font
 from chat import Chat
 from client import Client
 from threading import Thread
+from socket import AF_INET, socket, SOCK_STREAM
+from time import sleep
+
 
 COLOUR_LIGHT_BACKGROUND_1 = "#fff"
 COLOUR_LIGHT_BACKGROUND_2 = "#f2f3f5"
@@ -58,26 +61,30 @@ class Messenger(tk.Tk):
         style.configure("Message.TLabel", background=COLOUR_LIGHT_BACKGROUND_2)
         #############################################################################################
 
-        self.client = Client()
 
         self.chat_frame = Chat(
             self,
             background=COLOUR_LIGHT_BACKGROUND_3,
-            style="Messages.TFrame",
-            client = self.client
+            style="Messages.TFrame"
         )
 
         self.chat_frame.grid(row=0, column=0, sticky="NSEW")
 
-    def listen(self):
-        self.client.initialize_communication()
+
+        username = input("Enter your username: ")
+        self.chat_frame.client.send(username)
+
+
+    # def listen(self):
+    #     self.chat_frame.get_messages()
+    #     sleep(0.001)
 
       
 if __name__ == '__main__':
 
     root = Messenger()
 
-    p = Thread(target=root.listen)
-    p.start()
-    root.mainloop()
-    p.join()
+    receive_thread = Thread(target=root.chat_frame.client.receive)
+    receive_thread.start()
+    root.mainloop()  # Starts GUI execution.
+

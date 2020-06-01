@@ -1,19 +1,20 @@
 import tkinter as tk
 from tkinter import ttk
 from message_window import MessageWindow
+from client import Client
 
 messages = [{"message": "Hello, world", "date": 15498487}]
 message_labels = []
 
 
 class Chat(ttk.Frame):
-    def __init__(self, container, background, client, *args, **kwargs):
+    def __init__(self, container, background, *args, **kwargs):
         super().__init__(container, *args, **kwargs)
 
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
 
-        self.client = client
+        self.client = Client()
 
         self.message_window = MessageWindow(self, background=background)
         self.message_window.grid(row=0, column=0, sticky="NSEW", pady=5)
@@ -32,22 +33,20 @@ class Chat(ttk.Frame):
         )
         message_submit.pack()
 
-        message_fetch = ttk.Button(
-            input_frame,
-            text="Fetch",
-            style="FetchButton.TButton",
-            command=self.get_messages
-        )
-        message_fetch.pack()
+        # message_fetch = ttk.Button(
+        #     input_frame,
+        #     text="Fetch",
+        #     style="FetchButton.TButton",
+        #     command=self.get_messages
+        # )
+        # message_fetch.pack()
         
         
         #self.message_window.update_message_widgets(messages, message_labels)
     
     def post_message(self):
         body = self.message_input.get("1.0", "end").strip()
-        self.client.message = body
-        self.client.is_message_sent = True
-        self.client.available_messages.append((self.client.my_username, body))
+        self.client.send(body)
         self.message_input.delete('1.0', "end")
         self.get_messages()
 
@@ -55,4 +54,5 @@ class Chat(ttk.Frame):
         global messages
         messages = self.client.available_messages
         self.message_window.update_message_widgets(messages, message_labels)
-        self.after(150, lambda: self.message_window.yview_moveto(1.0))
+        self.message_window.yview_moveto(1.0)
+        self.after(150, lambda: self.get_messages())

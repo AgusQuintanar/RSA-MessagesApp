@@ -40,18 +40,16 @@ class MessageWindow(tk.Canvas):
 
     def update_message_widgets(self, messages, message_labels):
         existing_labels = [
-            (message, time) for message, time in message_labels
+            (user["text"], time["text"], message["text"]) for user, time, message in message_labels
         ]
 
-        for message in messages:
-            # message_time = datetime.datetime.fromtimestamp(message["date"]).strftime(
-            #     "%d-%m-%Y %H:%M:%S"
-            # )
 
-            if (message[0], message[1]) not in existing_labels:
-                self._create_message_container(message[1],message[0], message_labels)
+        for message in messages:
+
+            if (message[0], message[1], message[2]) not in existing_labels:
+                self._create_message_container(message[0], message[2], message[1], message_labels)
     
-    def _create_message_container(self, message_content, message_time, message_labels):
+    def _create_message_container(self, message_user, message_content, message_time, message_labels):
         container = ttk.Frame(self.messages_frame, style="Messages.TFrame")
         container.columnconfigure(1, weight=1)
         container.grid(sticky="EW", padx=(10, 50), pady=10)
@@ -64,17 +62,27 @@ class MessageWindow(tk.Canvas):
             self.messages_frame.update()
 
         container.bind("<Configure>", reconfigure_message_labels)
-        self._create_message_bubble(container, message_content, message_time, message_labels)
+        self._create_message_bubble(container, message_user, message_content, message_time, message_labels)
     
-    def _create_message_bubble(self, container, message_content, message_time, message_labels):
+    def _create_message_bubble(self, container, message_user, message_content, message_time, message_labels):
+
+        user_label = ttk.Label(
+            container,
+            text=message_user,
+            style="Time.TLabel"
+        )
+
+        user_label.grid(row=0, column=1, sticky="NEW")
 
         time_label = ttk.Label(
             container,
             text=message_time,
-            style="Time.TLabel"
+            style="Time.TLabel",
+            justify="right",
+            anchor="e",
         )
 
-        time_label.grid(row=0, column=1, sticky="NEW")
+        time_label.grid(row=0, column=2, sticky="NEW")
 
         message_label = ttk.Label(
             container,
@@ -85,6 +93,6 @@ class MessageWindow(tk.Canvas):
             style="Message.TLabel"
         )
 
-        message_label.grid(row=1, column=1, sticky="NEW")
+        message_label.grid(row=1, column=1, sticky="NEW", columnspan=2)
 
-        message_labels.append((message_label, time_label))
+        message_labels.append((user_label, time_label, message_label))
