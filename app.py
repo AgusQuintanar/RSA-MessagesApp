@@ -29,6 +29,7 @@ class Messenger(tk.Tk):
         self.minsize(800, 500)
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
+        self.title("AlphaChat v1.0 by Agus Quintanar")
         ########################################################################################
 
         ####################################### STYLE ##########################################
@@ -37,6 +38,8 @@ class Messenger(tk.Tk):
         style.theme_use("clam")
 
         style.configure("Messages.TFrame", background=COLOUR_LIGHT_BACKGROUND_3)
+
+        style.configure("MessagesOwner.TFrame", background="#25D366")
 
         style.configure("Controls.TFrame", background=COLOUR_LIGHT_BACKGROUND_2)
 
@@ -58,10 +61,20 @@ class Messenger(tk.Tk):
             font=8
         )
 
-        style.configure("Avatar.TLabel", background=COLOUR_LIGHT_BACKGROUND_3)
-        style.configure("Message.TLabel", background=COLOUR_LIGHT_BACKGROUND_2)
+        style.configure(
+            "TimeOwner.TLabel",
+            padding=5,
+            background="#4B9EFF",
+            foreground=COLOUR_LIGHT_BACKGROUND_1,
+            font=8
+        )
+
+        style.configure("Avatar.TLabel", background=COLOUR_LIGHT_BACKGROUND_3, padding=5)
+        style.configure("Message.TLabel", background=COLOUR_LIGHT_BACKGROUND_2, padding=5)
+        style.configure("MessageOwner.TLabel", background="#71B3FF")
         #############################################################################################
 
+        ##################################### CHAT  #################################################
         self.chat_frame = Chat(
             self,
             background=COLOUR_LIGHT_BACKGROUND_3,
@@ -69,23 +82,17 @@ class Messenger(tk.Tk):
         )
 
         self.chat_frame.grid(row=0, column=0, sticky="NSEW")
-
         self.chat_frame.client.send_public_key()
-
         username = input("Enter your username: ")
-
-
         self.chat_frame.client.send(username)
-
+        self.chat_frame.user = username
         self.protocol("WM_DELETE_WINDOW", self.chat_frame.client.on_closing)
 
-        
+        ###############################################################################################
 
       
 if __name__ == '__main__':
-
     root = Messenger()
-
     receive_thread = Thread(target=root.chat_frame.client.receive)
     receive_thread.start()
     root.mainloop()  

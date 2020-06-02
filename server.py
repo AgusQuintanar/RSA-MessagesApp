@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 
 import rsa
-
-"""Server for multithreaded (asynchronous) chat application."""
 from socket import AF_INET, socket, SOCK_STREAM
 from threading import Thread
 
@@ -36,9 +34,6 @@ def handle_client(client):  # Takes client socket as argument.
 
 def broadcast(msg, prefix=""):  # prefix is for name identification.
     """Broadcasts a message to all the clients."""
-
-    print("debug 1:", msg)
-
     for sock in clients:
         user, PUBLIC_KEY = clients[sock]
         print("PUBLIC KEY:", PUBLIC_KEY)
@@ -47,7 +42,8 @@ def broadcast(msg, prefix=""):  # prefix is for name identification.
         print("message to decrypt:", encrypted_msg)
         sock.send(bytes(prefix, "utf8")+bytes(encrypted_msg, "utf8"))
 
-        
+
+############################## SERVER CONFIGURATION ########################################
 clients = {}
 addresses = {}
 
@@ -58,10 +54,11 @@ ADDR = (HOST, PORT)
 
 SERVER = socket(AF_INET, SOCK_STREAM)
 SERVER.bind(ADDR)
+#############################################################################################
 
 if __name__ == "__main__":
-    SERVER.listen(5)
-    print("Waiting for connection...")
+    SERVER.listen(8) #MAX CAPACITY
+    print("Server Initialized")
     ACCEPT_THREAD = Thread(target=accept_incoming_connections)
     ACCEPT_THREAD.start()
     ACCEPT_THREAD.join()
